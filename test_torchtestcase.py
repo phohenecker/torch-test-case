@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import importlib
 import unittest
 
 import torch
@@ -50,49 +51,52 @@ class TorchTestCaseTest(unittest.TestCase):
 
     # noinspection PyArgumentList
     def test_assert_equals(self):
-        # CHECK: assert_tensor_equal is invoked appropriately
-        self.test_case.assertEqual(
-                torch.zeros(3),
-                torch.zeros(3)
-        )
-        with self.assertRaises(AssertionError):
-            self.test_case.assertEqual(
-                    torch.zeros(3),
-                    torch.ones(3)
-            )
-
-        # CHECK: assert_variable_equal is invoked appropriately
-        self.test_case.assertEqual(
-                ag.Variable(torch.zeros(3)),
-                ag.Variable(torch.zeros(3))
-        )
-        with self.assertRaises(AssertionError):
-            self.test_case.assertEqual(
-                    ag.Variable(torch.zeros(3)),
-                    ag.Variable(torch.ones(3))
-            )
-
-        # CHECK: assert_parameter_equal is invoked appropriately
-        self.test_case.assertEqual(
-                nn.Parameter(torch.zeros(3)),
-                nn.Parameter(torch.zeros(3))
-        )
-        with self.assertRaises(AssertionError):
-            self.test_case.assertEqual(
-                    nn.Parameter(torch.zeros(3)),
-                    nn.Parameter(torch.ones(3))
-            )
+        # this dict is used to register methods that have been invoked
+        invoked_methods = {
+                "assert_packed_sequence_equal": False,
+                "assert_parameter_equal": False,
+                "assert_tensor_equal": False,
+                "assert_variable_equal": False
+        }
         
+        # sets the respective entry in invoked_methods to True
+        def invoke(meth_name: str) -> None:
+            invoked_methods[meth_name] = True
+
+        # patch assertion methods of class TorchTestCase to just call invoke
+        ttc.TorchTestCase.assert_packed_sequence_equal = lambda *args, **kwargs: invoke("assert_packed_sequence_equal")
+        ttc.TorchTestCase.assert_parameter_equal = lambda *args, **kwargs: invoke("assert_parameter_equal")
+        ttc.TorchTestCase.assert_tensor_equal = lambda *args, **kwargs: invoke("assert_tensor_equal")
+        ttc.TorchTestCase.assert_variable_equal = lambda *args, **kwargs: invoke("assert_variable_equal")
+        
+        # create a new instance of patched class
+        test_case = ttc.TorchTestCase()
+
         # CHECK: assert_packed_sequence_equal is invoked appropriately
-        self.test_case.assertEqual(
+        self.assertFalse(invoked_methods["assert_packed_sequence_equal"])
+        test_case.assertEqual(
                 rnn.pack_padded_sequence(torch.FloatTensor([[1, 1], [1, 0]]), [2, 1]),
                 rnn.pack_padded_sequence(torch.FloatTensor([[1, 1], [1, 0]]), [2, 1])
         )
-        with self.assertRaises(AssertionError):
-            self.test_case.assertEqual(
-                    rnn.pack_padded_sequence(torch.FloatTensor([[1, 1], [1, 0]]), [2, 1]),
-                    rnn.pack_padded_sequence(torch.FloatTensor([[1, 1], [2, 0]]), [2, 1])
-            )
+        self.assertTrue(invoked_methods["assert_packed_sequence_equal"])
+
+        # CHECK: assert_parameter_equal is invoked appropriately
+        self.assertFalse(invoked_methods["assert_parameter_equal"])
+        test_case.assertEqual(nn.Parameter(torch.zeros(3)), nn.Parameter(torch.zeros(3)))
+        self.assertTrue(invoked_methods["assert_parameter_equal"])
+        
+        # CHECK: assert_tensor_equal is invoked appropriately
+        self.assertFalse(invoked_methods["assert_tensor_equal"])
+        test_case.assertEqual(torch.zeros(3), torch.zeros(3))
+        self.assertTrue(invoked_methods["assert_tensor_equal"])
+
+        # CHECK: assert_variable_equal is invoked appropriately
+        self.assertFalse(invoked_methods["assert_variable_equal"])
+        test_case.assertEqual(ag.Variable(torch.zeros(3)), ag.Variable(torch.zeros(3)))
+        self.assertTrue(invoked_methods["assert_variable_equal"])
+        
+        # reload module torchtestcase to undo changes
+        importlib.reload(ttc)
 
     # noinspection PyArgumentList
     def test_assert_packed_sequence_equal(self):
