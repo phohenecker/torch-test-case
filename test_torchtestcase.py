@@ -3,6 +3,7 @@
 
 
 import importlib
+import operator
 import unittest
 
 import torch
@@ -167,6 +168,80 @@ class TorchTestCaseTest(unittest.TestCase):
         self.test_case.assert_tensor_equal(torch.zeros(3), torch.zeros(3))
 
     # noinspection PyArgumentList
+    def test_assert_tensor_greater(self):
+        # CHECK: no error is raised if the assertion is True
+        self.test_case.assert_tensor_greater(torch.ones(3), torch.zeros(3))
+        self.test_case.assert_tensor_greater(1, torch.zeros(3))
+        self.test_case.assert_tensor_greater(torch.ones(3), 0)
+        
+        # CHECK: the assertion fails if the comparison does not apply
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_greater(
+                    torch.FloatTensor([0, 1]),
+                    torch.FloatTensor([1, 0])
+            )
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_greater(torch.FloatTensor([0, 1]), 1)
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_greater(1, torch.FloatTensor([0, 1]))
+
+    # noinspection PyArgumentList
+    def test_assert_tensor_greater_equal(self):
+        # CHECK: no error is raised if the assertion is True
+        self.test_case.assert_tensor_greater_equal(torch.ones(3), torch.ones(3))
+        self.test_case.assert_tensor_greater_equal(torch.ones(3), torch.zeros(3))
+        self.test_case.assert_tensor_greater_equal(1, torch.zeros(3))
+        self.test_case.assert_tensor_greater_equal(torch.ones(3), 1)
+    
+        # CHECK: the assertion fails if the comparison does not apply
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_greater_equal(
+                    torch.FloatTensor([0, 1]),
+                    torch.FloatTensor([1, 0])
+            )
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_greater_equal(torch.FloatTensor([0, 1]), 2)
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_greater_equal(0, torch.FloatTensor([0, 1]))
+
+    # noinspection PyArgumentList
+    def test_assert_tensor_less(self):
+        # CHECK: no error is raised if the assertion is True
+        self.test_case.assert_tensor_less(torch.zeros(3), torch.ones(3))
+        self.test_case.assert_tensor_less(0, torch.ones(3))
+        self.test_case.assert_tensor_less(torch.zeros(3), 1)
+    
+        # CHECK: the assertion fails if the comparison does not apply
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_less(
+                    torch.FloatTensor([0, 1]),
+                    torch.FloatTensor([1, 0])
+            )
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_less(torch.FloatTensor([0, 1]), 1)
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_less(0, torch.FloatTensor([0, 1]))
+
+    # noinspection PyArgumentList
+    def test_assert_tensor_less_equal(self):
+        # CHECK: no error is raised if the assertion is True
+        self.test_case.assert_tensor_less_equal(torch.ones(3), torch.ones(3))
+        self.test_case.assert_tensor_less_equal(torch.zeros(3), torch.ones(3))
+        self.test_case.assert_tensor_less_equal(0, torch.ones(3))
+        self.test_case.assert_tensor_less_equal(torch.zeros(3), 1)
+    
+        # CHECK: the assertion fails if the comparison does not apply
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_less_equal(
+                    torch.FloatTensor([0, 1]),
+                    torch.FloatTensor([1, 0])
+            )
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_less_equal(torch.FloatTensor([0, 1]), 0)
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_less_equal(2, torch.FloatTensor([0, 1]))
+
+    # noinspection PyArgumentList
     def test_assert_variable_equal(self):
         # CHECK: the assertion fails if either of the args is not a variable
         with self.assertRaises(AssertionError):
@@ -252,6 +327,205 @@ class TorchTestCaseTest(unittest.TestCase):
     
         # reload module torchtestcase to undo changes
         importlib.reload(ttc)
+    
+    def test_assertGreater(self):
+        # this dict is used to register methods that have been invoked
+        invoked_methods = {
+                "default": False,
+                "tensor": False
+        }
+
+        # sets the respective entry in invoked_methods to True
+        def invoke(meth_name: str) -> None:
+            invoked_methods[meth_name] = True
+
+        # patch tested assertion methods of class TorchTestCase to just call invoke
+        unittest.TestCase.assertGreater = lambda *args, **kwargs: invoke("default")
+        ttc.TorchTestCase.assert_tensor_greater = lambda *args, **kwargs: invoke("tensor")
+        
+        # create a new instance of patched class
+        test_case = ttc.TorchTestCase()
+        
+        # CHECK: the original assertGreater method is invoked appropriately
+        self.assertFalse(invoked_methods["default"])
+        test_case.assertGreater(1, 0)
+        self.assertTrue(invoked_methods["default"])
+
+        # CHECK: assert_tensor_greater is invoked appropriately
+        self.assertFalse(invoked_methods["tensor"])
+        test_case.assertGreater(1, torch.zeros(3))
+        self.assertTrue(invoked_methods["tensor"])
+        
+        # reload modules unittest and torchtestcase to undo changes
+        importlib.reload(unittest)
+        importlib.reload(ttc)
+
+    def test_assertGreaterEqual(self):
+        # this dict is used to register methods that have been invoked
+        invoked_methods = {
+                "default": False,
+                "tensor": False
+        }
+    
+        # sets the respective entry in invoked_methods to True
+        def invoke(meth_name: str) -> None:
+            invoked_methods[meth_name] = True
+    
+        # patch tested assertion methods of class TorchTestCase to just call invoke
+        unittest.TestCase.assertGreaterEqual = lambda *args, **kwargs: invoke("default")
+        ttc.TorchTestCase.assert_tensor_greater_equal = lambda *args, **kwargs: invoke("tensor")
+    
+        # create a new instance of patched class
+        test_case = ttc.TorchTestCase()
+    
+        # CHECK: the original assertGreaterEqual method is invoked appropriately
+        self.assertFalse(invoked_methods["default"])
+        test_case.assertGreaterEqual(1, 0)
+        self.assertTrue(invoked_methods["default"])
+    
+        # CHECK: assert_tensor_greater_equal is invoked appropriately
+        self.assertFalse(invoked_methods["tensor"])
+        test_case.assertGreaterEqual(1, torch.zeros(3))
+        self.assertTrue(invoked_methods["tensor"])
+    
+        # reload modules unittest and torchtestcase to undo changes
+        importlib.reload(unittest)
+        importlib.reload(ttc)
+
+    def test_assertLess(self):
+        # this dict is used to register methods that have been invoked
+        invoked_methods = {
+                "default": False,
+                "tensor": False
+        }
+    
+        # sets the respective entry in invoked_methods to True
+        def invoke(meth_name: str) -> None:
+            invoked_methods[meth_name] = True
+    
+        # patch tested assertion methods of class TorchTestCase to just call invoke
+        unittest.TestCase.assertLess = lambda *args, **kwargs: invoke("default")
+        ttc.TorchTestCase.assert_tensor_less = lambda *args, **kwargs: invoke("tensor")
+    
+        # create a new instance of patched class
+        test_case = ttc.TorchTestCase()
+    
+        # CHECK: the original assertLess method is invoked appropriately
+        self.assertFalse(invoked_methods["default"])
+        test_case.assertLess(0, 1)
+        self.assertTrue(invoked_methods["default"])
+    
+        # CHECK: assert_tensor_greater is invoked appropriately
+        self.assertFalse(invoked_methods["tensor"])
+        test_case.assertLess(0, torch.ones(3))
+        self.assertTrue(invoked_methods["tensor"])
+    
+        # reload modules unittest and torchtestcase to undo changes
+        importlib.reload(unittest)
+        importlib.reload(ttc)
+
+    def test_assertLessEqual(self):
+        # this dict is used to register methods that have been invoked
+        invoked_methods = {
+                "default": False,
+                "tensor": False
+        }
+    
+        # sets the respective entry in invoked_methods to True
+        def invoke(meth_name: str) -> None:
+            invoked_methods[meth_name] = True
+    
+        # patch tested assertion methods of class TorchTestCase to just call invoke
+        unittest.TestCase.assertLessEqual = lambda *args, **kwargs: invoke("default")
+        ttc.TorchTestCase.assert_tensor_less_equal = lambda *args, **kwargs: invoke("tensor")
+    
+        # create a new instance of patched class
+        test_case = ttc.TorchTestCase()
+    
+        # CHECK: the original assertLessEqual method is invoked appropriately
+        self.assertFalse(invoked_methods["default"])
+        test_case.assertLessEqual(0, 1)
+        self.assertTrue(invoked_methods["default"])
+    
+        # CHECK: assert_tensor_less_equal is invoked appropriately
+        self.assertFalse(invoked_methods["tensor"])
+        test_case.assertLessEqual(0, torch.ones(3))
+        self.assertTrue(invoked_methods["tensor"])
+    
+        # reload modules unittest and torchtestcase to undo changes
+        importlib.reload(unittest)
+        importlib.reload(ttc)
+    
+    def test_prepare_tensor_order_comparison(self):
+        # CHECK: providing illegally typed args causes a TypeError
+        with self.assertRaises(TypeError):
+            self.test_case._prepare_tensor_order_comparison(torch.ones(3), "no-tensor")
+        with self.assertRaises(TypeError):
+            self.test_case._prepare_tensor_order_comparison("no-tensor", torch.ones(3))
+        with self.assertRaises(TypeError):
+            self.test_case._prepare_tensor_order_comparison(torch.ones(3), ag.Variable(torch.zeros(3)))
+        with self.assertRaises(TypeError):
+            self.test_case._prepare_tensor_order_comparison(ag.Variable(torch.zeros(3)), torch.ones(3))
+        
+        # CHECK: providing two numbers causes a TypeError
+        with self.assertRaises(TypeError):
+            self.test_case._prepare_tensor_order_comparison(1, 2)
+        
+        # CHECK: providing two tensors of different shapes causes a ValueError
+        with self.assertRaises(ValueError):
+            self.test_case._prepare_tensor_order_comparison(torch.zeros(2), torch.ones(3))
+        
+        # CHECK: numbers are expanded correctly
+        first, second = self.test_case._prepare_tensor_order_comparison(torch.zeros(3), 1)
+        self.assertTrue(torch.equal(torch.zeros(3), first))
+        self.assertTrue(torch.equal(torch.ones(3), second))
+        first, second = self.test_case._prepare_tensor_order_comparison(0, torch.ones(3, 2))
+        self.assertTrue(torch.equal(torch.zeros(3, 2), first))
+        self.assertTrue(torch.equal(torch.ones(3, 2), second))
+        
+        # CHECK: no errors occur if two equally shaped tensors are provided
+        self.test_case._prepare_tensor_order_comparison(torch.zeros(3, 2, 1), torch.ones(3, 2, 1))
+
+    # noinspection PyArgumentList
+    def test_tensor_comparison(self):
+        # create several test tensors
+        tensor_0 = torch.zeros(3, 3)
+        tensor_1 = torch.FloatTensor(
+                [
+                        [0, 1, 2],
+                        [3, 4, 5],
+                        [6, 7, 8]
+                ]
+        )
+        tensor_2 = torch.LongTensor(
+                [
+                        [1, 1, 1],
+                        [4, 4, 4],
+                        [7, 7, 7]
+                ]
+        )
+        tensor_3 = torch.ShortTensor([1, 3, 5])
+        tensor_4 = torch.IntTensor([5, 2, 5])
+        
+        # CHECK: the method returns None if the comparison is True
+        self.assertIsNone(self.test_case._tensor_comparison(tensor_0, tensor_1, operator.le))
+        
+        # CHECK: the method provides a list of differing coordinates if the comparison is False
+        self.assertEqual(
+                [
+                        (0, 1),
+                        (0, 2),
+                        (1, 1),
+                        (1, 2),
+                        (2, 1),
+                        (2, 2)
+                ],
+                self.test_case._tensor_comparison(tensor_1, tensor_2, operator.lt)
+        )
+        self.assertEqual(
+                [(0,)],
+                self.test_case._tensor_comparison(tensor_3, tensor_4, operator.ge)
+        )
 
 
 if __name__ == "__main__":
