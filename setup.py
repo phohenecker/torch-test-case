@@ -52,7 +52,10 @@ setup(
         ],
         description="Extends unittest.TestCase such that assertions support PyTorch tensors and variables.",
         download_url="https://github.com/phohenecker/torch-test-case/archive/v2017.1.tar.gz",
-        install_requires=["torch>=0.2.0"],
+        install_requires=[
+                "numpy>=1.13.1",
+                "torch>=0.2.0"
+        ],
         license="MIT License",
         long_description=long_description,
         name="torchtestcase",

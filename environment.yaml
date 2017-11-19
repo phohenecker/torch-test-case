@@ -30,4 +30,5 @@ channels:
   - soumith
 dependencies:
   - python>=3.5
+  - numpy>=1.13.1
   - pytorch>=0.2.0
