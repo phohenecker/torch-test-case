@@ -31,11 +31,13 @@ PyTorch Assertions
 ------------------
 
 This section describes those assertions provided by the class `TorchTestCase` that support PyTorch.
-If you are not familiar with the package `unittest`, then read about if first
+If you are not familiar with the package `unittest`, then read about it first
 [here](https://docs.python.org/3/library/unittest.html).
 
 
-### 1. Equality Assertions: `assertEqual`, `assertNotEqual`
+### 1. Equality Assertions
+
+(`assertEqual`, `assertNotEqual`)
 
 Equality assertions support objects that are any kind of PyTorch tensors as well as instances of
 `torch.autograd.Variable`, `torch.nn.Parameter`, and `torch.nn.utils.rnn.PackedSequence`.
@@ -45,7 +47,9 @@ self.assertEqual(torch.zeros(4), autograd.Variable(torch.zeros(4))  # -> Asserti
 ```
 
 
-### 2. Order Assertions: `assertGreater`, `assertGreaterEqual`, `assertLess`, `assertLessEqual`
+### 2. Order Assertions
+
+(`assertGreater`, `assertGreaterEqual`, `assertLess`, `assertLessEqual`)
 
 In general, order assertions are assumed to be fulfilled if they hold element-wise.
 For example:
