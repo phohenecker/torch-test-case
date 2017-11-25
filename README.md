@@ -16,7 +16,6 @@ The module `torch-test-case` defines the class `TorchTestCase`, which extends `u
 assertions support instances of various PyTorch classes.
 
 
-<!--
 Installation
 ------------
 
@@ -24,7 +23,6 @@ This module can be installed from PyPI:
 ```
 pip install torchtestcase
 ```
--->
 
 
 PyTorch Assertions
