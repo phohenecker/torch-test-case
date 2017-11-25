@@ -12,7 +12,7 @@ A possible workaround is to use
 [`TestCase.assertTrue`](https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertTrue) for any assertion
 that we need to make, yet this commonly leads to convoluted code that is hard to read and maintain.
 
-The module `torch-test-case` defines the class `TorchTestCase`, which extends `unittest.TestCase` such that many
+The module `torchtestcase` defines the class `TorchTestCase`, which extends `unittest.TestCase` such that many
 assertions support instances of various PyTorch classes.
 
 
