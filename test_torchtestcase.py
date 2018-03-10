@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 
-import importlib
 import operator
 import unittest
 
 import torch
+
+from unittest import mock
 
 from torch import autograd as ag
 from torch import nn
@@ -280,181 +281,78 @@ class TorchTestCaseTest(unittest.TestCase):
         )
 
     # noinspection PyArgumentList
-    def test_assertEqual(self):
-        # this dict is used to register methods that have been invoked
-        invoked_methods = {
-                "assert_packed_sequence_equal": False,
-                "assert_parameter_equal": False,
-                "assert_tensor_equal": False,
-                "assert_variable_equal": False
-        }
-    
-        # sets the respective entry in invoked_methods to True
-        def invoke(meth_name: str) -> None:
-            invoked_methods[meth_name] = True
-    
-        # patch assertion methods of class TorchTestCase to just call invoke
-        ttc.TorchTestCase.assert_packed_sequence_equal = lambda *args, **kwargs: invoke("assert_packed_sequence_equal")
-        ttc.TorchTestCase.assert_parameter_equal = lambda *args, **kwargs: invoke("assert_parameter_equal")
-        ttc.TorchTestCase.assert_tensor_equal = lambda *args, **kwargs: invoke("assert_tensor_equal")
-        ttc.TorchTestCase.assert_variable_equal = lambda *args, **kwargs: invoke("assert_variable_equal")
-    
-        # create a new instance of patched class
-        test_case = ttc.TorchTestCase()
-    
+    @staticmethod
+    def test_assertEqual():
         # CHECK: assert_packed_sequence_equal is invoked appropriately
-        self.assertFalse(invoked_methods["assert_packed_sequence_equal"])
-        test_case.assertEqual(
-                rnn.pack_padded_sequence(torch.FloatTensor([[1, 1], [1, 0]]), [2, 1]),
-                rnn.pack_padded_sequence(torch.FloatTensor([[1, 1], [1, 0]]), [2, 1])
-        )
-        self.assertTrue(invoked_methods["assert_packed_sequence_equal"])
+        with mock.patch.object(ttc.TorchTestCase, "assert_packed_sequence_equal") as mock_method:
+            ttc.TorchTestCase().assertEqual(
+                    rnn.pack_padded_sequence(torch.FloatTensor([[1, 1], [1, 0]]), [2, 1]),
+                    rnn.pack_padded_sequence(torch.FloatTensor([[1, 1], [1, 0]]), [2, 1])
+            )
+        mock_method.assert_called_once()
     
         # CHECK: assert_parameter_equal is invoked appropriately
-        self.assertFalse(invoked_methods["assert_parameter_equal"])
-        test_case.assertEqual(nn.Parameter(torch.zeros(3)), nn.Parameter(torch.zeros(3)))
-        self.assertTrue(invoked_methods["assert_parameter_equal"])
-    
+        with mock.patch.object(ttc.TorchTestCase, "assert_parameter_equal") as mock_method:
+            ttc.TorchTestCase().assertEqual(nn.Parameter(torch.zeros(3)), nn.Parameter(torch.zeros(3)))
+        mock_method.assert_called_once()
+        
         # CHECK: assert_tensor_equal is invoked appropriately
-        self.assertFalse(invoked_methods["assert_tensor_equal"])
-        test_case.assertEqual(torch.zeros(3), torch.zeros(3))
-        self.assertTrue(invoked_methods["assert_tensor_equal"])
-    
+        with mock.patch.object(ttc.TorchTestCase, "assert_tensor_equal") as mock_method:
+            ttc.TorchTestCase().assertEqual(torch.zeros(3), torch.zeros(3))
+        mock_method.assert_called_once()
+        
         # CHECK: assert_variable_equal is invoked appropriately
-        self.assertFalse(invoked_methods["assert_variable_equal"])
-        test_case.assertEqual(ag.Variable(torch.zeros(3)), ag.Variable(torch.zeros(3)))
-        self.assertTrue(invoked_methods["assert_variable_equal"])
+        with mock.patch.object(ttc.TorchTestCase, "assert_variable_equal") as mock_method:
+            ttc.TorchTestCase().assertEqual(ag.Variable(torch.zeros(3)), ag.Variable(torch.zeros(3)))
+        mock_method.assert_called_once()
     
-        # reload module torchtestcase to undo changes
-        importlib.reload(ttc)
-    
-    def test_assertGreater(self):
-        # this dict is used to register methods that have been invoked
-        invoked_methods = {
-                "default": False,
-                "tensor": False
-        }
-
-        # sets the respective entry in invoked_methods to True
-        def invoke(meth_name: str) -> None:
-            invoked_methods[meth_name] = True
-
-        # patch tested assertion methods of class TorchTestCase to just call invoke
-        unittest.TestCase.assertGreater = lambda *args, **kwargs: invoke("default")
-        ttc.TorchTestCase.assert_tensor_greater = lambda *args, **kwargs: invoke("tensor")
-        
-        # create a new instance of patched class
-        test_case = ttc.TorchTestCase()
-        
+    @staticmethod
+    def test_assertGreater():
         # CHECK: the original assertGreater method is invoked appropriately
-        self.assertFalse(invoked_methods["default"])
-        test_case.assertGreater(1, 0)
-        self.assertTrue(invoked_methods["default"])
+        with mock.patch.object(ttc.TorchTestCase, "assertGreater") as mock_method:
+            ttc.TorchTestCase().assertGreater(1, 0)
+        mock_method.assert_called_once()
 
         # CHECK: assert_tensor_greater is invoked appropriately
-        self.assertFalse(invoked_methods["tensor"])
-        test_case.assertGreater(1, torch.zeros(3))
-        self.assertTrue(invoked_methods["tensor"])
-        
-        # reload modules unittest and torchtestcase to undo changes
-        importlib.reload(unittest)
-        importlib.reload(ttc)
+        with mock.patch.object(ttc.TorchTestCase, "assert_tensor_greater") as mock_method:
+            ttc.TorchTestCase().assertGreater(1, torch.zeros(3))
+        mock_method.assert_called_once()
 
-    def test_assertGreaterEqual(self):
-        # this dict is used to register methods that have been invoked
-        invoked_methods = {
-                "default": False,
-                "tensor": False
-        }
-    
-        # sets the respective entry in invoked_methods to True
-        def invoke(meth_name: str) -> None:
-            invoked_methods[meth_name] = True
-    
-        # patch tested assertion methods of class TorchTestCase to just call invoke
-        unittest.TestCase.assertGreaterEqual = lambda *args, **kwargs: invoke("default")
-        ttc.TorchTestCase.assert_tensor_greater_equal = lambda *args, **kwargs: invoke("tensor")
-    
-        # create a new instance of patched class
-        test_case = ttc.TorchTestCase()
-    
+    @staticmethod
+    def test_assertGreaterEqual():
         # CHECK: the original assertGreaterEqual method is invoked appropriately
-        self.assertFalse(invoked_methods["default"])
-        test_case.assertGreaterEqual(1, 0)
-        self.assertTrue(invoked_methods["default"])
+        with mock.patch.object(ttc.TorchTestCase, "assertGreaterEqual") as mock_method:
+            ttc.TorchTestCase().assertGreaterEqual(1, 0)
+        mock_method.assert_called_once()
     
         # CHECK: assert_tensor_greater_equal is invoked appropriately
-        self.assertFalse(invoked_methods["tensor"])
-        test_case.assertGreaterEqual(1, torch.zeros(3))
-        self.assertTrue(invoked_methods["tensor"])
-    
-        # reload modules unittest and torchtestcase to undo changes
-        importlib.reload(unittest)
-        importlib.reload(ttc)
+        with mock.patch.object(ttc.TorchTestCase, "assert_tensor_greater_equal") as mock_method:
+            ttc.TorchTestCase().assertGreaterEqual(1, torch.zeros(3))
+        mock_method.assert_called_once()
 
-    def test_assertLess(self):
-        # this dict is used to register methods that have been invoked
-        invoked_methods = {
-                "default": False,
-                "tensor": False
-        }
-    
-        # sets the respective entry in invoked_methods to True
-        def invoke(meth_name: str) -> None:
-            invoked_methods[meth_name] = True
-    
-        # patch tested assertion methods of class TorchTestCase to just call invoke
-        unittest.TestCase.assertLess = lambda *args, **kwargs: invoke("default")
-        ttc.TorchTestCase.assert_tensor_less = lambda *args, **kwargs: invoke("tensor")
-    
-        # create a new instance of patched class
-        test_case = ttc.TorchTestCase()
-    
+    @staticmethod
+    def test_assertLess():
         # CHECK: the original assertLess method is invoked appropriately
-        self.assertFalse(invoked_methods["default"])
-        test_case.assertLess(0, 1)
-        self.assertTrue(invoked_methods["default"])
+        with mock.patch.object(ttc.TorchTestCase, "assertLess") as mock_method:
+            ttc.TorchTestCase().assertLess(0, 1)
+        mock_method.assert_called_once()
     
         # CHECK: assert_tensor_greater is invoked appropriately
-        self.assertFalse(invoked_methods["tensor"])
-        test_case.assertLess(0, torch.ones(3))
-        self.assertTrue(invoked_methods["tensor"])
-    
-        # reload modules unittest and torchtestcase to undo changes
-        importlib.reload(unittest)
-        importlib.reload(ttc)
+        with mock.patch.object(ttc.TorchTestCase, "assert_tensor_less") as mock_method:
+            ttc.TorchTestCase().assertLess(0, torch.ones(3))
+        mock_method.assert_called_once()
 
-    def test_assertLessEqual(self):
-        # this dict is used to register methods that have been invoked
-        invoked_methods = {
-                "default": False,
-                "tensor": False
-        }
-    
-        # sets the respective entry in invoked_methods to True
-        def invoke(meth_name: str) -> None:
-            invoked_methods[meth_name] = True
-    
-        # patch tested assertion methods of class TorchTestCase to just call invoke
-        unittest.TestCase.assertLessEqual = lambda *args, **kwargs: invoke("default")
-        ttc.TorchTestCase.assert_tensor_less_equal = lambda *args, **kwargs: invoke("tensor")
-    
-        # create a new instance of patched class
-        test_case = ttc.TorchTestCase()
-    
+    @staticmethod
+    def test_assertLessEqual():
         # CHECK: the original assertLessEqual method is invoked appropriately
-        self.assertFalse(invoked_methods["default"])
-        test_case.assertLessEqual(0, 1)
-        self.assertTrue(invoked_methods["default"])
+        with mock.patch.object(ttc.TorchTestCase, "assertLessEqual") as mock_method:
+            ttc.TorchTestCase().assertLessEqual(0, 1)
+        mock_method.assert_called_once()
     
         # CHECK: assert_tensor_less_equal is invoked appropriately
-        self.assertFalse(invoked_methods["tensor"])
-        test_case.assertLessEqual(0, torch.ones(3))
-        self.assertTrue(invoked_methods["tensor"])
-    
-        # reload modules unittest and torchtestcase to undo changes
-        importlib.reload(unittest)
-        importlib.reload(ttc)
+        with mock.patch.object(ttc.TorchTestCase, "assert_tensor_less_equal") as mock_method:
+            ttc.TorchTestCase().assertLessEqual(0, torch.ones(3))
+        mock_method.assert_called_once()
     
     def test_prepare_tensor_order_comparison(self):
         # CHECK: providing illegally typed args causes a TypeError
