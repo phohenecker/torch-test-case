@@ -60,6 +60,7 @@ setup(
         long_description=long_description,
         name="torchtestcase",
         py_modules=["torchtestcase"],
+        python_requires=">=3.5",
         url="https://github.com/phohenecker/torch-test-case",
         version="2017.1"
 )
