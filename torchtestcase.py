@@ -92,7 +92,8 @@ class TorchTestCase(unittest.TestCase):
             torch.FloatTensor,
             torch.cuda.FloatTensor,
             torch.DoubleTensor,
-            torch.cuda.DoubleTensor
+            torch.cuda.DoubleTensor,
+            torch.Tensor  # this is an alias for the default tensor type torch.FloatTensor
     ]
     """list[type]: A list of all different types of PyTorch tensors."""
     
@@ -331,8 +332,8 @@ class TorchTestCase(unittest.TestCase):
             self._fail_with_message(msg, "The first argument is not a tensor!")
         if type(second) not in self.TENSOR_TYPES:
             self._fail_with_message(msg, "The second argument is not a tensor!")
-        if not isinstance(first, type(second)):
-            self._fail_with_message(msg, "A {} is not a {}!".format(type(first).__name__, type(second).__name__))
+        if first.dtype != second.dtype:
+            self._fail_with_message(msg, "A {} is not a {}!".format(first.dtype, second.dtype))
         
         # check whether tensors are equal
         if not torch.equal(first, second):
