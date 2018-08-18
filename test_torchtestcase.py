@@ -9,7 +9,6 @@ import torch
 
 from unittest import mock
 
-from torch import autograd as ag
 from torch import nn
 from torch.nn.utils import rnn
 
@@ -243,44 +242,6 @@ class TorchTestCaseTest(unittest.TestCase):
             self.test_case.assert_tensor_less_equal(2, torch.FloatTensor([0, 1]))
 
     # noinspection PyArgumentList
-    def test_assert_variable_equal(self):
-        # CHECK: the assertion fails if either of the args is not a variable
-        with self.assertRaises(AssertionError):
-            self.test_case.assert_variable_equal("no tensor", ag.Variable(torch.zeros(3)))
-        with self.assertRaises(AssertionError):
-            self.test_case.assert_variable_equal(ag.Variable(torch.zeros(3)), torch.zeros(3))
-    
-        # CHECK: the assertion fails if the args contain data of different types
-        with self.assertRaises(AssertionError):
-            self.test_case.assert_variable_equal(
-                    ag.Variable(torch.FloatTensor([0])),
-                    ag.Variable(torch.LongTensor([0]))
-            )
-    
-        # CHECK: the assertion fails if the args differ in values or shape
-        with self.assertRaises(AssertionError):
-            self.test_case.assert_variable_equal(
-                    ag.Variable(torch.FloatTensor([0, 1])),
-                    ag.Variable(torch.FloatTensor([0, 2]))
-            )
-        with self.assertRaises(AssertionError):
-            self.test_case.assert_variable_equal(
-                    ag.Variable(torch.FloatTensor([0, 1])),
-                    ag.Variable(torch.FloatTensor([0, 1, 2]))
-            )
-        with self.assertRaises(AssertionError):
-            self.test_case.assert_variable_equal(
-                    ag.Variable(torch.FloatTensor([0, 1])),
-                    ag.Variable(torch.FloatTensor([[0, 1]]))
-            )
-    
-        # CHECK: no errors are raised for equal variables
-        self.test_case.assert_variable_equal(
-                ag.Variable(torch.zeros(3)),
-                ag.Variable(torch.zeros(3))
-        )
-
-    # noinspection PyArgumentList
     @staticmethod
     def test_assertEqual():
         # CHECK: assert_packed_sequence_equal is invoked appropriately
@@ -299,11 +260,6 @@ class TorchTestCaseTest(unittest.TestCase):
         # CHECK: assert_tensor_equal is invoked appropriately
         with mock.patch.object(ttc.TorchTestCase, "assert_tensor_equal") as mock_method:
             ttc.TorchTestCase().assertEqual(torch.zeros(3), torch.zeros(3))
-        mock_method.assert_called_once()
-        
-        # CHECK: assert_variable_equal is invoked appropriately
-        with mock.patch.object(ttc.TorchTestCase, "assert_variable_equal") as mock_method:
-            ttc.TorchTestCase().assertEqual(ag.Variable(torch.zeros(3)), ag.Variable(torch.zeros(3)))
         mock_method.assert_called_once()
     
     @staticmethod
@@ -361,9 +317,9 @@ class TorchTestCaseTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.test_case._prepare_tensor_order_comparison("no-tensor", torch.ones(3))
         with self.assertRaises(TypeError):
-            self.test_case._prepare_tensor_order_comparison(torch.ones(3), ag.Variable(torch.zeros(3)))
+            self.test_case._prepare_tensor_order_comparison(torch.ones(3), nn.Parameter(torch.zeros(3)))
         with self.assertRaises(TypeError):
-            self.test_case._prepare_tensor_order_comparison(ag.Variable(torch.zeros(3)), torch.ones(3))
+            self.test_case._prepare_tensor_order_comparison(nn.Parameter(torch.zeros(3)), torch.ones(3))
         
         # CHECK: providing two numbers causes a TypeError
         with self.assertRaises(TypeError):
