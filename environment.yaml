@@ -29,6 +29,6 @@ name: torch-test-case
 channels:
   - pytorch
 dependencies:
-  - python>=3.5
+  - python>=3.6
   - numpy>=1.13.1
   - pytorch>=0.4
