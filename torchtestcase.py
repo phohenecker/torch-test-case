@@ -72,7 +72,8 @@ class TorchTestCase(unittest.TestCase):
             torch.FloatTensor,
             torch.cuda.FloatTensor,
             torch.DoubleTensor,
-            torch.cuda.DoubleTensor
+            torch.cuda.DoubleTensor,
+            torch.Tensor  # this is an alias for the default tensor type torch.FloatTensor
     ]
     """list[type]: A list of all types of PyTorch tensors that are supported by order assertions, like lower-than."""
 
@@ -154,7 +155,7 @@ class TorchTestCase(unittest.TestCase):
         """
         # ensure that both args are either a tensor or a number
         if type(first) not in cls.ORDER_ASSERTION_TYPES and not isinstance(first, numbers.Real):
-            raise TypeError("The first argument is neither a supported type fo tensor nor a number!")
+            raise TypeError("The first argument is neither a supported type of tensor nor a number!")
         if type(second) not in cls.ORDER_ASSERTION_TYPES and not isinstance(second, numbers.Real):
             raise TypeError("The second argument is neither a supported type of tensor nor a number!")
         
