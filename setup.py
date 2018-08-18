@@ -7,7 +7,7 @@ from distutils.core import setup
 
 __author__ = "Patrick Hohenecker"
 __copyright__ = (
-        "Copyright (c) 2017 Patrick Hohenecker\n"
+        "Copyright (c) 2018 Patrick Hohenecker\n"
         "\n"
         "Permission is hereby granted, free of charge, to any person obtaining a copy\n"
         "of this software and associated documentation files (the \"Software\"), to deal\n"
@@ -28,8 +28,8 @@ __copyright__ = (
         "SOFTWARE."
 )
 __license__ = "MIT License"
-__version__ = "2017.1"
-__date__ = "Nov 17, 2017"
+__version__ = "2018.1"
+__date__ = "Aug 18, 2017"
 __maintainer__ = "Patrick Hohenecker"
 __email__ = "mail@paho.at"
 __status__ = "Production"
@@ -44,17 +44,18 @@ setup(
         classifiers=[
                 "License :: OSI Approved :: MIT License",
                 "Programming Language :: Python :: 3.5",
-                "Programming Language :: Python :: 3.6"
+                "Programming Language :: Python :: 3.6",
+                "Programming Language :: Python :: 3.7"
         ],
-        copyright="Copyright (c) 2017 Patrick Hohenecker",
+        copyright="Copyright (c) 2018 Patrick Hohenecker",
         data_files=[
                 (".", ["LICENSE", "README.md"])
         ],
         description="Extends unittest.TestCase such that assertions support PyTorch tensors and variables.",
-        download_url="https://github.com/phohenecker/torch-test-case/archive/v2017.1.tar.gz",
+        download_url="https://github.com/phohenecker/torch-test-case/archive/v2018.1.tar.gz",
         install_requires=[
                 "numpy>=1.13.1",
-                "torch>=0.2.0"
+                "torch>=0.4.0"
         ],
         license="MIT License",
         long_description=long_description,
@@ -62,5 +63,5 @@ setup(
         py_modules=["torchtestcase"],
         python_requires=">=3.5",
         url="https://github.com/phohenecker/torch-test-case",
-        version="2017.1"
+        version="2018.1"
 )
