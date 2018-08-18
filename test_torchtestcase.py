@@ -17,7 +17,7 @@ import torchtestcase as ttc
 
 __author__ = "Patrick Hohenecker"
 __copyright__ = (
-        "Copyright (c) 2017 Patrick Hohenecker\n"
+        "Copyright (c) 2018 Patrick Hohenecker\n"
         "\n"
         "Permission is hereby granted, free of charge, to any person obtaining a copy\n"
         "of this software and associated documentation files (the \"Software\"), to deal\n"
@@ -38,8 +38,8 @@ __copyright__ = (
         "SOFTWARE."
 )
 __license__ = "MIT License"
-__version__ = "2017.1"
-__date__ = "Nov 17, 2017"
+__version__ = "2018.1"
+__date__ = "Aug 18, 2018"
 __maintainer__ = "Patrick Hohenecker"
 __email__ = "mail@paho.at"
 __status__ = "Development"

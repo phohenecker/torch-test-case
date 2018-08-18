@@ -29,7 +29,7 @@ __copyright__ = (
 )
 __license__ = "MIT License"
 __version__ = "2018.1"
-__date__ = "Aug 18, 2017"
+__date__ = "Aug 18, 2018"
 __maintainer__ = "Patrick Hohenecker"
 __email__ = "mail@paho.at"
 __status__ = "Production"
@@ -51,7 +51,7 @@ setup(
         data_files=[
                 (".", ["LICENSE", "README.md"])
         ],
-        description="Extends unittest.TestCase such that assertions support PyTorch tensors and variables.",
+        description="Extends unittest.TestCase such that assertions support PyTorch tensors and parameters.",
         download_url="https://github.com/phohenecker/torch-test-case/archive/v2018.1.tar.gz",
         install_requires=[
                 "numpy>=1.13.1",
