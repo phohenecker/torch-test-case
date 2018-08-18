@@ -9,7 +9,6 @@ import unittest
 import numpy as np
 import torch
 
-from torch import autograd as ag
 from torch import nn
 from torch.nn.utils import rnn
 
@@ -49,10 +48,10 @@ class TorchTestCase(unittest.TestCase):
     PyTorch classes.
     
     ``TorchTestCase`` provides the following PyTorch-specific functionality:
-    * ``assertEqual`` supports all kinds of PyTorch tensors as well as instances of ``torch.autograd.Variable``,
-      ``torch.nn.Parameter``, and ``torch.nn.utils.rnn.PackedSequence``.
+    * ``assertEqual`` supports all kinds of PyTorch tensors as well as instances of ``torch.nn.Parameter`` and
+      ``torch.nn.utils.rnn.PackedSequence``.
     * ``assertGreater``, ``assertGreaterEqual``, ``assertLess``, and ``assertLessEqual`` support all kinds of PyTorch
-      tensors except ``CharTensor``s as well as instances of ``torch.autograd.Variable`` and ``torch.nn.Parameter``.
+      tensors except ``CharTensor``s as well as instances of ``torch.nn.Parameter``.
       Furthermore, these assertions allow for comparing tensors to numbers. Notice, however, that neither of the
       mentioned assertions performs any kind of type check in the sense that it is possible to compare a
       ``FloatTensor`` with a ``Parameter``, for example.
@@ -106,9 +105,6 @@ class TorchTestCase(unittest.TestCase):
         # add equality functions for tensors
         for t in self.TENSOR_TYPES:
             self.addTypeEqualityFunc(t, self.assert_tensor_equal)
-        
-        # add equality function for variables
-        self.addTypeEqualityFunc(ag.Variable, self.assert_variable_equal)
 
         # add equality function for parameters
         self.addTypeEqualityFunc(nn.Parameter, self.assert_parameter_equal)
@@ -212,13 +208,13 @@ class TorchTestCase(unittest.TestCase):
         """
         # check whether any of the args is a tensor/variable/parameter
         # if yes -> call tensor-specific assertion check
-        all_tensor_types = self.TENSOR_TYPES + [ag.Variable, nn.Parameter]
+        all_tensor_types = self.TENSOR_TYPES + [nn.Parameter]
         if type(first) in all_tensor_types or type(second) in all_tensor_types:
         
-            # turn variables/parameters into tensors
-            if isinstance(first, ag.Variable) or isinstance(first, nn.Parameter):
+            # turn parameters into tensors
+            if isinstance(first, nn.Parameter):
                 first = first.data
-            if isinstance(second, ag.Variable) or isinstance(second, nn.Parameter):
+            if isinstance(second, nn.Parameter):
                 second = second.data
         
             # invoke assertion check for tensors
@@ -238,7 +234,7 @@ class TorchTestCase(unittest.TestCase):
         
         The provided tensors may be of any, possibly different types of PyTorch tensors except ``CharTensor``. They do
         have to be of equal shape, though. Notice further that this method expects actual tensors as opposed to PyTorch
-        ``Variable``s or ``Parameter``s.
+        ``Parameter``s.
         
         Args:
             first: The first PyTorch tensor to compare.
@@ -463,32 +459,6 @@ class TorchTestCase(unittest.TestCase):
                         second[pos]
                 )
             self._fail_with_message(msg, std_msg)
-    
-    def assert_variable_equal(self, first, second, msg: str=None) -> None:
-        """An equality assertion for PyTorch variables.
-
-        Args:
-            first: The first variable to compare.
-            second: The second variable to compare.
-            msg: An optional error message.
-        """
-        # check whether both args are variables that contain the same data type
-        if not isinstance(first, ag.Variable):
-            self._fail_with_message(msg, "The first argument is not a variable!")
-        if not isinstance(second, ag.Variable):
-            self._fail_with_message(msg, "The second argument is not a variable!")
-        if not isinstance(first.data, type(second.data)):
-            self._fail_with_message(
-                    msg,
-                    "The variables contain data of different types: a {} is not a {}!".format(
-                            type(first.data).__name__,
-                            type(second.data).__name__
-                    )
-            )
-
-        # check whether the variables' data tensors are equal
-        if not torch.equal(first.data, second.data):
-            self._fail_with_message(msg, "The variables contain different data!")
     
     def assertGreater(self, a, b, msg=None):
         self._tensor_aware_assertion(self.assert_tensor_greater, super().assertGreater, a, b, msg)
