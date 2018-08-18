@@ -110,7 +110,7 @@ class TorchTestCaseTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.test_case.assert_parameter_equal(
                     nn.Parameter(torch.FloatTensor([0])),
-                    nn.Parameter(torch.LongTensor([0]))
+                    nn.Parameter(torch.LongTensor([0]), requires_grad=False)
             )
     
         # CHECK: the assertion fails if the args differ in values or shape

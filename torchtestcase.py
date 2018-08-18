@@ -305,12 +305,12 @@ class TorchTestCase(unittest.TestCase):
             self._fail_with_message(msg, "The first argument is not a parameter!")
         if not isinstance(second, nn.Parameter):
             self._fail_with_message(msg, "The second argument is not a parameter!")
-        if not isinstance(first.data, type(second.data)):
+        if first.data.dtype != second.data.dtype:
             self._fail_with_message(
                     msg,
                     "The parameters contain data of different types: a {} is not a {}!".format(
-                            type(first.data).__name__,
-                            type(second.data).__name__
+                            first.data.dtype,
+                            second.data.dtype
                     )
             )
 
