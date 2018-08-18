@@ -277,17 +277,17 @@ class TorchTestCase(unittest.TestCase):
             self._fail_with_message(msg, "The first argument is not a PackedSequence!")
         if not isinstance(second, rnn.PackedSequence):
             self._fail_with_message(msg, "The second argument is not a PackedSequence!")
-        if not isinstance(first.data, type(second.data)):
+        if first.data.dtype != second.data.dtype:
             self._fail_with_message(
                     msg,
                     "The sequences contain data of different types: a {} is not a {}!".format(
-                            type(first.data).__name__,
-                            type(second.data).__name__
+                            first.data.dtype,
+                            second.data.dtype
                     )
             )
 
         # check whether the sequences' batch sizes and data tensors are equal
-        if first.batch_sizes != second.batch_sizes:
+        if not torch.equal(first.batch_sizes, second.batch_sizes):
             self._fail_with_message(msg, "The sequences have different batch size!")
         if not torch.equal(first.data, second.data):
             self._fail_with_message(msg, "The sequences contain different data!")
