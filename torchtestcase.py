@@ -97,6 +97,9 @@ class TorchTestCase(unittest.TestCase):
     ]
     """list[type]: A list of all different types of PyTorch tensors."""
     
+    _eps = 0.0
+    """float: The element-wise absolute tolerance that is enforced in equality assertions."""
+    
     #  CONSTRUCTOR  ####################################################################################################
 
     def __init__(self, *args, **kwargs):
@@ -331,9 +334,17 @@ class TorchTestCase(unittest.TestCase):
             self._fail_with_message(msg, "The second argument is not a tensor!")
         if first.dtype != second.dtype:
             self._fail_with_message(msg, "A {} is not a {}!".format(first.dtype, second.dtype))
+        if first.size() != second.size():
+            self._fail_with_message(
+                    msg,
+                    "The tensors have different shapes: {} vs. {}!".format(first.size(), second.size())
+            )
         
         # check whether tensors are equal
-        if not torch.equal(first, second):
+        if (
+                (self._eps and (first - second).abs().max().item() > self._eps) or
+                (not self._eps and not torch.equal(first, second))
+        ):
             self._fail_with_message(msg, "The tensors are different!")
     
     def assert_tensor_greater(self, first, second, msg: str=None) -> None:
@@ -471,3 +482,36 @@ class TorchTestCase(unittest.TestCase):
 
     def assertLessEqual(self, a, b, msg=None):
         self._tensor_aware_assertion(self.assert_tensor_less_equal, super().assertLessEqual, a, b, msg)
+    
+    @classmethod
+    def eps(cls, new_eps: numbers.Real=None) -> float:
+        """Specifies and retrieves, respectively, the enforced tolerance in tensor equality assertions.
+        
+        The tolerance value for equality assertions between two tensors is interpreted as the maximum element-wise
+        absolute difference that the compared tensors may exhibit. Notice that a specified tolerance is enforced for
+        comparisons of **two tensors** only, and only for **equality assertions**.
+        
+        Args:
+            new_eps (numbers.Real, optional): If provided, then the tolerance is set to the given value. Notice that
+                ``new_eps`` has to be non-negatives.
+        
+        Returns:
+            float: The currently used tolerance, which corresponds with ``new_eps`` if it has been provided..
+        
+        Raises:
+            TypeError: If ``new_eps`` is not a real number.
+            ValueError: If ``new_eps`` is a negative number.
+        """
+        # if no new value for eps has been provided, then simply return the current one
+        if new_eps is None:
+            return cls._eps
+        
+        # sanitize the provided arg
+        if not isinstance(new_eps, numbers.Real):
+            raise TypeError("<new_eps> has to be a real number, but is of type {}!".format(type(new_eps)))
+        new_eps = float(new_eps)
+        if new_eps < 0:
+            raise ValueError("<new_eps> has to be non-negative, but was specified as {}!".format(new_eps))
+        
+        # update eps value
+        cls._eps = new_eps

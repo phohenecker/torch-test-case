@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import importlib
 import operator
 import unittest
 
@@ -48,6 +49,7 @@ __status__ = "Development"
 class TorchTestCaseTest(unittest.TestCase):
     
     def setUp(self):
+        ttc.TorchTestCase.eps(0)
         self.test_case = ttc.TorchTestCase()
 
     # noinspection PyArgumentList
@@ -153,6 +155,12 @@ class TorchTestCaseTest(unittest.TestCase):
                     torch.FloatTensor([0, 1]),
                     torch.FloatTensor([0, 2])
             )
+        ttc.TorchTestCase.eps(1e-9)  # <<<<<<<<<< change of tolerance
+        with self.assertRaises(AssertionError):
+            self.test_case.assert_tensor_equal(
+                    torch.zeros(3),
+                    11e-10 * torch.ones(3)
+            )
         with self.assertRaises(AssertionError):
             self.test_case.assert_tensor_equal(
                     torch.FloatTensor([0, 1]),
@@ -164,8 +172,11 @@ class TorchTestCaseTest(unittest.TestCase):
                     torch.FloatTensor([[0, 1]])
             )
         
-        # CHECK: no errors are raised for equal tensors
+        # CHECK: no errors are raised for (approximately) equal tensors
+        ttc.TorchTestCase.eps(0)
         self.test_case.assert_tensor_equal(torch.zeros(3), torch.zeros(3))
+        ttc.TorchTestCase.eps(1e-9)
+        self.test_case.assert_tensor_equal(torch.zeros(3), 1e-9 * torch.ones(3))
 
     # noinspection PyArgumentList
     def test_assert_tensor_greater(self):
@@ -309,6 +320,33 @@ class TorchTestCaseTest(unittest.TestCase):
         with mock.patch.object(ttc.TorchTestCase, "assert_tensor_less_equal") as mock_method:
             ttc.TorchTestCase().assertLessEqual(0, torch.ones(3))
         mock_method.assert_called_once()
+    
+    def test_eps(self):
+        # reload the module torchtestcase to reset the value of eps
+        importlib.reload(ttc)
+        
+        # CHECK: the initial value of eps is 0
+        self.assertEqual(0, ttc.TorchTestCase.eps())
+        
+        # CHECK: legal values of eps are stored correctly
+        ttc.TorchTestCase.eps(1e-9)
+        self.assertEqual(1e-9, ttc.TorchTestCase.eps())
+        ttc.TorchTestCase.eps(1)
+        self.assertEqual(1, ttc.TorchTestCase.eps())
+        ttc.TorchTestCase.eps(0)
+        self.assertEqual(0, ttc.TorchTestCase.eps())
+        
+        # CHECK: providing anything but a real number causes a TypeError
+        with self.assertRaises(TypeError):
+            ttc.TorchTestCase.eps("0.001")
+        with self.assertRaises(TypeError):
+            ttc.TorchTestCase.eps([0.001])
+        
+        # CHECK: providing negative numbers causes a ValueError
+        with self.assertRaises(ValueError):
+            ttc.TorchTestCase.eps(-0.001)
+        with self.assertRaises(ValueError):
+            ttc.TorchTestCase.eps(-1)
     
     def test_prepare_tensor_order_comparison(self):
         # CHECK: providing illegally typed args causes a TypeError
