@@ -97,13 +97,12 @@ class TorchTestCase(unittest.TestCase):
     ]
     """list[type]: A list of all different types of PyTorch tensors."""
     
-    _eps = 0.0
-    """float: The element-wise absolute tolerance that is enforced in equality assertions."""
-    
     #  CONSTRUCTOR  ####################################################################################################
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self._eps = 0.0  # the element-wise absolute tolerance that is enforced in equality assertions
         
         # add equality functions for tensors
         for t in self.TENSOR_TYPES:
@@ -114,6 +113,30 @@ class TorchTestCase(unittest.TestCase):
         
         # add equality function for packed sequences
         self.addTypeEqualityFunc(torch.nn.utils.rnn.PackedSequence, self.assert_packed_sequence_equal)
+    
+    #  PROPERTIES  #####################################################################################################
+    
+    @property
+    def eps(self) -> float:
+        """float: The element-wise absolute tolerance that is enforced in equality assertions.
+        
+        The tolerance value for equality assertions between two tensors is interpreted as the maximum element-wise
+        absolute difference that the compared tensors may exhibit. Notice that a specified tolerance is enforced for
+        comparisons of **two tensors** only, and only for **equality assertions**.
+        """
+        return self._eps
+    
+    @eps.setter
+    def eps(self, eps: numbers.Real) -> None:
+        # sanitize the provided arg
+        if not isinstance(eps, numbers.Real):
+            raise TypeError("<eps> has to be a real number, but is of type {}!".format(type(eps)))
+        eps = float(eps)
+        if eps < 0:
+            raise ValueError("<eps> has to be non-negative, but was specified as {}!".format(eps))
+    
+        # update eps value
+        self._eps = eps
     
     #  METHODS  ########################################################################################################
     
@@ -482,36 +505,3 @@ class TorchTestCase(unittest.TestCase):
 
     def assertLessEqual(self, a, b, msg=None):
         self._tensor_aware_assertion(self.assert_tensor_less_equal, super().assertLessEqual, a, b, msg)
-    
-    @classmethod
-    def eps(cls, new_eps: numbers.Real=None) -> float:
-        """Specifies and retrieves, respectively, the enforced tolerance in tensor equality assertions.
-        
-        The tolerance value for equality assertions between two tensors is interpreted as the maximum element-wise
-        absolute difference that the compared tensors may exhibit. Notice that a specified tolerance is enforced for
-        comparisons of **two tensors** only, and only for **equality assertions**.
-        
-        Args:
-            new_eps (numbers.Real, optional): If provided, then the tolerance is set to the given value. Notice that
-                ``new_eps`` has to be non-negatives.
-        
-        Returns:
-            float: The currently used tolerance, which corresponds with ``new_eps`` if it has been provided..
-        
-        Raises:
-            TypeError: If ``new_eps`` is not a real number.
-            ValueError: If ``new_eps`` is a negative number.
-        """
-        # if no new value for eps has been provided, then simply return the current one
-        if new_eps is None:
-            return cls._eps
-        
-        # sanitize the provided arg
-        if not isinstance(new_eps, numbers.Real):
-            raise TypeError("<new_eps> has to be a real number, but is of type {}!".format(type(new_eps)))
-        new_eps = float(new_eps)
-        if new_eps < 0:
-            raise ValueError("<new_eps> has to be non-negative, but was specified as {}!".format(new_eps))
-        
-        # update eps value
-        cls._eps = new_eps
