@@ -15,8 +15,8 @@ that we need to make, yet this commonly leads to convoluted code that is hard to
 The module `torchtestcase` defines the class `TorchTestCase`, which extends `unittest.TestCase` such that many
 assertions support instances of various PyTorch classes.
 
-**Update**:
-Version 2018.1 has been released, and supports PyTorch 0.4 now.
+**Updates**:
+- Version 2018.1 has been released, and supports PyTorch 0.4 now.
 
 
 Installation
@@ -49,8 +49,19 @@ Equality assertions support objects that are any kind of PyTorch tensors as well
 and `torch.nn.utils.rnn.PackedSequence`.
 Notice, however, that an `AssertionError` is raised if the compared objects are instances of different types:
 ```python
-self.assertEqual(torch.zeros(4), nn.Parameter(torch.zeros(4))  # -> AssertionError
+self.assertEqual(torch.zeros(4), nn.Parameter(torch.zeros(4)))  # -> AssertionError
 ```
+
+Occasionally, we do not expect two tensors to match each other exactly, which is the case if we anticipate numerical
+instabilities, for example.
+For any such case, `TorchTestCase` provides the possibility to specify a certain tolerance:
+
+```python
+self.eps = 0.001                                          # specify tolerance for equality assertions
+self.assertEqual(torch.zeros(3), 0.001 * torch.ones(3))   # -> no AssertionError
+self.assertEqual(torch.zeros(3), 0.0011 * torch.ones(3))  # -> AssertionError
+```
+Notice that a specified tolerance is taken into account for **equality assertions** between **two tensors** only. 
 
 
 ### 2. Order Assertions
