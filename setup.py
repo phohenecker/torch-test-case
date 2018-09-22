@@ -63,5 +63,5 @@ setup(
         py_modules=["torchtestcase"],
         python_requires=">=3.5",
         url="https://github.com/phohenecker/torch-test-case",
-        version="2018.1"
+        version="2018.2"
 )
