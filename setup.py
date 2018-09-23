@@ -52,7 +52,7 @@ setup(
                 (".", ["LICENSE", "README.md"])
         ],
         description="Extends unittest.TestCase such that assertions support PyTorch tensors and parameters.",
-        download_url="https://github.com/phohenecker/torch-test-case/archive/v2018.1.tar.gz",
+        download_url="https://github.com/phohenecker/torch-test-case/archive/v2018.2.tar.gz",
         install_requires=[
                 "numpy>=1.13.1",
                 "torch>=0.4.0"
