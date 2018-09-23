@@ -17,6 +17,8 @@ assertions support instances of various PyTorch classes.
 
 **Updates**:
 - Version 2018.1 has been released, and supports PyTorch 0.4 now.
+- Version 2018.2 has been released, and introduces the specification of a permissible deviation for tensor equality
+  assertions.
 
 
 Installation
