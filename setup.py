@@ -59,6 +59,7 @@ setup(
         ],
         license="MIT License",
         long_description=long_description,
+        long_description_content_type='text/markdown',
         name="torchtestcase",
         py_modules=["torchtestcase"],
         python_requires=">=3.5",
