@@ -1,5 +1,4 @@
-torch-test-case
-===============
+# torch-test-case
 
 
 Using Python's [`unittest`](https://docs.python.org/3/library/unittest.html) package turns out to be cumbersome when we
@@ -21,8 +20,7 @@ assertions support instances of various PyTorch classes.
   assertions.
 
 
-Installation
-------------
+## Installation
 
 This module can be installed from PyPI:
 ```
@@ -30,8 +28,7 @@ pip install torchtestcase
 ```
 
 
-PyTorch Assertions
-------------------
+## PyTorch Assertions
 
 This section describes those assertions provided by the class `TorchTestCase` that support PyTorch.
 If you are not familiar with the package `unittest`, then read about it first
